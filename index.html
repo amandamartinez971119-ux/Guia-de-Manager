@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Guía del Manager</title>
+<title>Flow Berro &amp; El Lashy</title>
 <style>
 :root{color-scheme:light;--bg:#fff;--fg:#1c1b1f;--mu:#6b6872;--cd:#f3f2f6;--ac:#5b3fd6;--bd:#dcd9e3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#15141a;--fg:#ece9f3;--mu:#a29eb0;--cd:#201f27;--ac:#9d86ff;--bd:#35333f}}
 :root[data-theme="dark"]{color-scheme:dark;--bg:#15141a;--fg:#ece9f3;--mu:#a29eb0;--cd:#201f27;--ac:#9d86ff;--bd:#35333f}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
-header{padding:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header{padding:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:linear-gradient(120deg,#21152f,#111018);color:#fff;border-bottom:2px solid #7548cf}header>b{font-size:17px;letter-spacing:.2px;margin-right:auto}header button{background:#35224f;color:#fff;border-color:#7654aa}header button:first-of-type{background:#7544d6;border-color:#9b7ce6;font-weight:700}header .mu{color:#d4c9e8;flex-basis:100%}
 nav{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--bd)}
 main{max-width:900px;margin:auto;padding:12px}
 button,input,textarea,select{font:inherit;color:var(--fg);background:var(--cd);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;max-width:100%}
@@ -30,9 +30,9 @@ td input{width:100%;box-sizing:border-box;border:0;background:transparent}
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 </head><body>
-<header><b>🎧 Guía del Manager</b><button id="ex">Exportar</button><button id="imb">Importar</button>
-<input type="file" id="im" accept=".json" hidden>
-<span class="mu">Las contraseñas se guardan sin cifrar en este navegador: no compartas el enlace.</span></header>
+<header><b>🎧 Flow Berro &amp; El Lashy</b><button id="ex">Crear copia de seguridad</button><button id="imb">Restaurar copia</button>
+<button id="theme">Cambiar tema</button><input type="file" id="im" accept=".json,application/json" hidden>
+<span class="mu">La copia puede contener datos privados. Guárdala en un lugar seguro.</span></header>
 <textarea id="xo" hidden readonly></textarea>
 <nav></nav>
 <main><div id="np" class="card" hidden><div class="r"><input id="nn" placeholder="Nombre">
@@ -95,12 +95,15 @@ io('readonly',s=>s.get(f.id)).then(async b=>{if(!b)return;const u=await du(b);c.
 $('#nb').onclick=()=>{const n=$('#nn').value.trim()||'Nueva',k=$('#nt').value,id=U();let c=$('#nc').value.split(',').map(x=>x.trim()).filter(Boolean);if(!c.length)c=['Columna 1','Columna 2'];
 S.tabs.push(k=='doc'?doc(id,n,[['Nueva ventana','']]):k=='tab'?tab(id,n,c,c.map((x,i)=>/contrase/i.test(x)?i:-1).filter(i=>i>=0)):k=='chk'?chk(id,n,['Tarea 1'],0):{id,n,t:'med',f:[]});
 S.cur=id;$('#np').hidden=true;$('#nn').value='';$('#nc').value='';sv();R()};
-$('#ex').onclick=async()=>{const f={};for(const t of S.tabs)if(t.t=='med')for(const m of t.f){const b=await io('readonly',s=>s.get(m.id));if(b)f[m.id]=await du(b)}
-const j=JSON.stringify({S,f}),d=window.claude?await claude.use('downloads'):null;
-if(d){try{await d.save({filename:'guia-manager-'+td()+'.json',data:j})}catch(e){}}else{const a=$('#xo');a.hidden=false;a.value=j;a.select()}};
+$('#ex').onclick=async()=>{try{const f={};for(const t of S.tabs)if(t.t=='med')for(const m of t.f){const b=await io('readonly',s=>s.get(m.id));if(b)f[m.id]=await du(b)}
+const j=JSON.stringify({format:'flow-berro-backup',version:2,createdAt:new Date().toISOString(),S,f});
+const blob=new Blob([j],{type:'application/json'}),url=URL.createObjectURL(blob),a=E('a',{href:url,download:'flow-berro-el-lashy-backup-'+td()+'.json'});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Copia creada. Guárdala en un lugar seguro; puede incluir material y datos privados.');
+}catch(err){alert('No se pudo crear la copia. Comprueba el espacio disponible y vuelve a intentarlo.')}};
 $('#imb').onclick=()=>$('#im').click();
-$('#im').onchange=async e=>{const x=e.target.files[0];if(!x)return;try{const o=JSON.parse(await x.text());if(!o.S||!o.S.tabs)throw 0;
-for(const id in o.f){const b=bl(o.f[id]);await io('readwrite',s=>s.put(b,id))}S=o.S;sv();R()}catch(err){alert('Archivo no válido')}e.target.value=''};
+$('#im').onchange=async e=>{const x=e.target.files[0];if(!x)return;try{if(!confirm('Restaurar sustituirá los datos actuales de la guía. Haz una copia de seguridad antes de continuar. ¿Deseas seguir?')){e.target.value='';return}const o=JSON.parse(await x.text());if(!o.S||!Array.isArray(o.S.tabs))throw 0;
+for(const id in (o.f||{})){const b=bl(o.f[id]);await io('readwrite',s=>s.put(b,id))}S=o.S;sv();R();alert('Copia restaurada. Revisa las pestañas y el material.')}catch(err){alert('Archivo no válido o no se pudo restaurar. Los datos existentes pueden no haberse reemplazado por completo.')}e.target.value=''};
+$('#theme').onclick=()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';localStorage.setItem('fb_theme',dark?'dark':'light')};
+const savedTheme=localStorage.getItem('fb_theme');if(savedTheme)document.documentElement.dataset.theme=savedTheme;
 R();
 </script>
 <style>

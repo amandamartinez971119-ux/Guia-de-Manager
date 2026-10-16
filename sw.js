@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flow-berro-el-lashy-v1';
+const CACHE_NAME = 'flow-berro-el-lashy-v2';
 const CORE = [
   './',
   './index.html',
