@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.amandamartinez971119_ux.twa",
+      "sha256_cert_fingerprints": [
+        "C1:6E:59:68:34:AC:1E:F5:74:5D:85:64:85:96:18:34:96:FC:13:70:0A:DB:A3:9C:82:35:AE:83:9E:DB:B8:47"
+      ]
+    }
+  }
+]
